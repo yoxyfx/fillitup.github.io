@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keyboard Drawing Game - Tutorial</title>
+    <style>
+        body {
+            background-color: #f0f0f0;
+            background-image: url('img/background.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            font-family: 'pencilpete-font';
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            color: #333;
+        }
+
+        @font-face {
+            font-family: 'pencilpete-font';
+            src: url('PencilpeteFont-2eE3.ttf') format('opentype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        h1, h2, p {
+            text-align: center;
+            margin: 10px 20px;
+            margin-top:40px;
+            color: #333;
+            font-size: 1.5em; /* Increase font size */
+        }
+
+
+        .tutorial-container {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            text-align: left;
+            height: 80vh;
+            margin: 20px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            flex-direction: column; /* Align items vertically */
+        }
+
+        .story, .instructions, .image-container, .video-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .story h2, .instructions h2 {
+            font-size: 2em;
+            color: #4CAF50;
+            animation: colorChange 2s infinite;
+        }
+
+        @keyframes colorChange {
+            0% { color: #4CAF50; }
+            25% { color: #ffcc00; }
+            50% { color: #ff3300; }
+            75% { color: #66ccff; }
+            100% { color: #4CAF50; }
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.3s;
+            display: block;
+            margin: 20px auto;
+        }
+
+        button:hover {
+            background-color: #45a049;
+            transform: scale(1.1);
+        }
+
+        #startGameButton {
+            background-color: #007bff; /* Blue color for Start Game button */
+        }
+
+        #startGameButton:hover {
+            background-color: #0056b3; /* Darker blue on hover */
+        }
+
+        .animated-element {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        .image-container img, .video-container video {
+            max-width: 100%;
+            border: 2px solid #000;
+            border-radius: 10px;
+        }
+
+        .colorful-image {
+            animation: rotateAndScale 10s infinite;
+        }
+
+        @keyframes rotateAndScale {
+            0%, 100% {
+                transform: scale(1) rotate(0deg);
+            }
+            50% {
+                transform: scale(1.2) rotate(360deg);
+            }
+        }
+
+        .hover-description {
+            position: relative;
+            display: inline-block;
+        }
+
+        .hover-description .description-text {
+            visibility: hidden;
+            width: 200px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            text-align: center;
+            border-radius: 5px;
+            padding: 5px 0;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .hover-description:hover .description-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-top: auto; /* Move navigation buttons to the bottom */
+        }
+
+        .nav-buttons button {
+            width: 100px;
+        }
+
+        .visible {
+            display: flex;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+<h1>Welcome to the Keyboard Drawing Game!</h1>
+<div class="tutorial-container">
+    <div class="story visible">
+        <h2 class="animated-element">Story</h2>
+        <p>In a world where creativity is the ultimate power, you are an artist on a mission to bring colors to a desolate land. The legendary Glass of Inspiration stands before you, but it can only be filled with the vibrant hues of your imagination. Use your keyboard to navigate and paint, filling the world with life and beauty. Are you ready to embark on this colorful journey?</p>
+    </div>
+    <div class="instructions">
+        <h2 class="animated-element">How to Play</h2>
+        <p><strong>Objective:</strong> Use the arrow keys to paint the canvas and score points by filling as much of the canvas as possible within the time limit.</p>
+        <p><strong>Controls:</strong></p>
+        <ul>
+            <li><strong>Arrow Keys:</strong> Move the brush up, down, left, and right.</li>
+            <li><strong>Space:</strong> Restart the game.</li>
+            <li><strong>P:</strong> Pause/Resume the game.</li>
+        </ul>
+        <p><strong>Game Mechanics:</strong></p>
+        <ul>
+            <li>The game consists of 3 rounds, each with a 15-second time limit.</li>
+            <li>Fill as much of the canvas as possible to score points. Each new pixel painted earns you 10 points.</li>
+            <li>Avoid painting over the same pixel, as it won't earn you additional points.</li>
+            <li>Each round increases the canvas size, making it more challenging.</li>
+        </ul>
+    </div>
+    <div class="image-container hover-description">
+        <img src="img/gameplay.png" alt="Gameplay Image" class="colorful-image">
+        <div class="description-text">This is how your gameplay will look like! Use arrow keys to paint and score points.</div>
+    </div>
+    <div class="video-container">
+        <video controls>
+            <source src="videos/gameplay-tutorial.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+    <div class="nav-buttons">
+        <button id="prevButton">Previous</button>
+        <button id="nextButton">Next</button>
+    </div>
+    <button id="startGameButton">Start Game</button>
+</div>
+<script>
+    const sections = document.querySelectorAll('.tutorial-container > div');
+    const imageContainer = document.querySelector('.image-container');
+    let currentIndex = 0;
+
+    function updateVisibility() {
+        sections.forEach((section, index) => {
+            if (index === currentIndex) {
+                section.classList.add('visible');
+                if (section.classList.contains('story') || section.classList.contains('instructions')) {
+                    imageContainer.classList.add('hidden');
+                } else {
+                    imageContainer.classList.remove('hidden');
+                }
+            } else {
+                section.classList.remove('visible');
+            }
+        });
+    }
+
+    document.getElementById('nextButton').addEventListener('click', function() {
+        currentIndex = (currentIndex + 1) % sections.length;
+        updateVisibility();
+    });
+
+    document.getElementById('prevButton').addEventListener('click', function() {
+        currentIndex = (currentIndex - 1 + sections.length) % sections.length;
+        updateVisibility();
+    });
+
+    document.getElementById('startGameButton').addEventListener('click', function() {
+        window.location.href = 'play.html'; // Navigate to game page
+    });
+
+    // Initial visibility update
+    updateVisibility();
+</script>
+</body>
+</html>
