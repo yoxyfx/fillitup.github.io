@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keyboard Drawing Game</title>
+    <style>
+        body {
+            background-color: #f0f0f0;
+            background-image: url('img/background.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            font-family: 'pencilpete-font';
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overscroll-behavior: none;
+            overflow: hidden;
+        }
+
+        @font-face {
+            font-family: 'pencilpete-font';
+            src: url('PencilpeteFont-2eE3.ttf') format('opentype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: #333;
+            margin: 5px 0;
+        }
+
+        #gameContainer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+        #gameContainer button {
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        a {
+            text-decoration: none;
+            color: black;
+            margin-left: 1em;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        a img.icon {
+            display: inline-block;
+            height: 1em;
+            margin: 0 0 -0.1em 0.3em;
+        }
+
+        canvas {
+            border: 2px solid #000;
+            background-color: #cef;
+            margin-top: 10px;
+            transform: translateY(-10px);
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        #glass {
+            position: relative;
+            width: 200px;
+            height: 300px;
+            background-color: #9cf;
+            border: 2px solid #000;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+
+        #water {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            background-color: #cef;
+            animation: fillWater 2s linear infinite;
+        }
+
+        @keyframes fillWater {
+            0% {
+                height: 0;
+            }
+            100% {
+                height: 100%;
+            }
+        }
+    </style>
+
+</head>
+<body>
+<h1>FILL UP WITH WATER!</h1>
+<div id="gameContainer">
+    <div id="welcomeMessage" style="display: none;"></div>
+    <button id="startButton">Start</button>
+    <button id="pauseButton" style="display: none;">Pause</button>
+
+    <div>
+        <h2>Round: <span id="round">1</span>/3</h2>
+        <h2>Score: <span id="score">0</span></h2>
+        <h2>Time: <span id="time">15</span></h2>
+    </div>
+
+    <div>
+        <label for="colorPicker">Select Color: </label>
+        <input type="color" id="colorPicker" value="#00673a"><!--기본 색 바꾸기-->
+    </div>
+
+    <div id="glass">
+        <div id="water"></div>
+    </div>
+    <canvas id="gameCanvas" width="200" height="150"></canvas>
+    <div>
+        <button id="restartButton" style="display: none;">Restart</button>
+        <h2>Press Space to Restart</h2>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const initialCanvasWidth = 200;
+    const initialCanvasHeight = 150;
+    const canvasGrowthFactor = 50; // Increase size by 50 for each round
+    let x = initialCanvasWidth / 2;
+    let y = initialCanvasHeight / 2;
+    let size = 20;
+    let score = 0;
+    let round = 1;
+    const totalRounds = 3;
+    let time = 15; // 시간을 15로 설정
+    const roundDisplay = document.getElementById('round');
+    const scoreDisplay = document.getElementById('score');
+    const timeDisplay = document.getElementById('time');
+    const welcomeMessage = document.getElementById('welcomeMessage');
+    const startButton = document.getElementById('startButton');
+    const pauseButton = document.getElementById('pauseButton');
+    let timerId;
+    let prevX = x;
+    let prevY = y;
+    let gameStarted = false;
+
+    // Initialize selectedColor with default value
+    let selectedColor = '#00673a';
+
+    const colorPicker = document.getElementById('colorPicker');
+    colorPicker.addEventListener('input', function(event) {
+        selectedColor = event.target.value;
+    });
+
+    startButton.addEventListener('click', function() {
+        startButton.style.display = 'none';
+        const playerName = prompt('Enter your name:');
+        if (playerName !== null && playerName.trim() !== '') {
+            round = 1;
+            roundDisplay.textContent = round;
+            reset();
+            score = 0;
+            scoreDisplay.textContent = score;
+            welcomeMessage.textContent = 'Welcome, ' + playerName + '! Let\'s start the game.';
+            welcomeMessage.style.display = 'block';
+            timerId = setInterval(countdown, 1000);
+            gameStarted = true;
+            pauseButton.style.display = 'inline-block';
+        } else {
+            alert('Please enter your name before starting the game.');
+        }
+    });
+
+    pauseButton.addEventListener('click', function() {
+        clearInterval(timerId);
+        alert('Game paused! Press OK to resume.');
+        timerId = setInterval(countdown, 1000);
+    });
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === ' ') {
+            reset();
+        } else if (event.key === 'p' || event.key === 'P') {
+            clearInterval(timerId);
+            alert('Game paused! Press OK to resume.');
+            timerId = setInterval(countdown, 1000);
+        } else {
+            drawLine(event.key);
+        }
+    });
+
+    function drawLine(direction) {
+        if (!gameStarted) return;
+
+        let newX = x;
+        let newY = y;
+
+        switch (direction) {
+            case 'ArrowUp':
+                newY = y - size;
+                break;
+            case 'ArrowDown':
+                newY = y + size;
+                break;
+            case 'ArrowLeft':
+                newX = x - size;
+                break;
+            case 'ArrowRight':
+                newX = x + size;
+                break;
+            case ' ': // Space key
+                reset();
+                return;
+        }
+
+        // Check if new position is within canvas bounds
+        if (newX >= 0 && newX <= canvas.width - size && newY >= 0 && newY <= canvas.height - size) {
+            // Update the position
+            prevX = x;
+            prevY = y;
+            x = newX;
+            y = newY;
+
+            // Draw the previous pixel in the selected color
+            ctx.fillStyle = selectedColor;
+            ctx.fillRect(prevX, prevY, size, size);
+
+            // Get the color of the new position pixel
+            const pixelColor = ctx.getImageData(x, y, 1, 1).data;
+
+            // If the pixel is not already selectedColor, increase the score
+            if (!(pixelColor[0] === parseInt(selectedColor.slice(1, 3), 16) &&
+                pixelColor[1] === parseInt(selectedColor.slice(3, 5), 16) &&
+                pixelColor[2] === parseInt(selectedColor.slice(5, 7), 16))) {
+                score += 10;
+                scoreDisplay.textContent = score;
+                drawPixel(x, y, 'black'); // Draw the current pixel
+            } else {
+                drawPixel(x, y, 'red'); // If the pixel is already the selected color, draw it in red
+            }
+        }
+    }
+
+    // Function to draw a single pixel
+    function drawPixel(x, y, color) {
+        ctx.fillStyle = color;
+        ctx.fillRect(x, y, size, size);
+    }
+
+    function countdown() {
+        time--;
+        timeDisplay.textContent = time;
+
+        if (time <= 0) {
+            clearInterval(timerId);
+            if (round < totalRounds) {
+                alert('Time\'s up! Moving to the next round.');
+                round++;
+                roundDisplay.textContent = round;
+                reset();
+            } else {
+                alert('Time\'s up! Game Over! Your Final Score: ' + score);
+                round = 1;
+                roundDisplay.textContent = round;
+                reset();
+            }
+        }
+
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const pixels = imageData.data;
+        let bluePixelCount = 0;
+        for (let i = 0; i < pixels.length; i += 4) {
+            if (pixels[i] === 0 && pixels[i + 1] === 0 && pixels[i + 2] === 255) {
+                bluePixelCount++;
+            }
+        }
+
+        const totalPixels = getTotalPixels();
+        if (bluePixelCount === totalPixels) {
+            clearInterval(timerId);
+            if (round < totalRounds) {
+                alert(round + ' 라운드 종료! 당신의 점수: ' + score);
+                round++;
+                roundDisplay.textContent = round;
+                reset();
+            } else {
+                alert('Game Over! Your Final Score: ' + score);
+                round = 1;
+                roundDisplay.textContent = round;
+                reset();
+            }
+        }
+    }
+
+    const glass = document.getElementById('glass');
+
+    function resetCanvasSize() {
+        canvas.width = initialCanvasWidth + (round - 1) * canvasGrowthFactor;
+        canvas.height = initialCanvasHeight + (round - 1) * canvasGrowthFactor;
+        size = 20;
+        glass.style.width = canvas.width + 'px';
+        glass.style.height = canvas.height + 'px';
+    }
+    window.addEventListener("resize", function() {
+        resetCanvasSize();
+    });
+
+    function reset() {
+        clearInterval(timerId);
+        time = 15;
+        timeDisplay.textContent = time;
+        resetCanvasSize();
+        x = canvas.width / 2;
+        y = canvas.height / 2;
+        prevX = x;
+        prevY = y;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        timerId = setInterval(countdown, 1000);
+        gameStarted = true;
+
+        score = 0;
+        scoreDisplay.textContent = score;
+    }
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === ' ') {
+            reset();
+        } else {
+            drawLine(event.key);
+        }
+    });
+
+    function getTotalPixels() {
+        return (canvas.width / size) * (canvas.height / size);
+    }
+</script>
+</body>
+</html>
