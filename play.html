@@ -174,6 +174,7 @@
     let gameStarted = false;
     let playAgainPrompted = false; // Flag to track if play again prompt has been shown
     let selectedColor = '#00673a';
+    let roundScores = [0, 0, 0]; // Array to store scores for each round
 
     const colorPicker = document.getElementById('colorPicker');
     colorPicker.addEventListener('input', function(event) {
@@ -294,6 +295,7 @@
                 alert('Time\'s up! Moving to the next round.');
                 round++;
                 roundDisplay.textContent = round;
+                roundScores[round - 2] = score; // Store the score for the completed round
                 reset();
             } else {
                 endGame();
@@ -315,6 +317,7 @@
             playSound(roundEndSound);
             if (round < totalRounds) {
                 alert(round + ' 라운드 종료! 당신의 점수: ' + score);
+                roundScores[round - 1] = score; // Store the score for the completed round
                 round++;
                 roundDisplay.textContent = round;
                 reset();
@@ -339,8 +342,8 @@
     });
 
     function reset() {
-        clearInterval(timerId);
-        time = 25; //시간 조절
+        clearInterval(timerId); // 현재 타이머 멈춤
+        time = 25; // 시간 초기화
         timeDisplay.textContent = time;
         resetCanvasSize();
         x = canvas.width / 2;
@@ -350,7 +353,7 @@
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        timerId = setInterval(countdown, 1000);
+        timerId = setInterval(countdown, 1000); // 새로운 타이머 시작
         gameStarted = true;
 
         score = 0;
@@ -375,28 +378,24 @@
         bgMusic.pause();
         bgMusic.currentTime = 0; // Reset playback position
 
-        // Only ask once if the player wants to play again
-        if (playAgainPrompted) return; // If already prompted, return
-
-        playAgainPrompted = true; // Set flag to indicate prompt has been shown
-
-        // Ask if the player wants to play again
-        let playAgain = confirm('Game Over! Your Final Score: ' + score + '\n\nDo you want to play again?');
-
-        if (playAgain) {
-            // Reset game variables and display
-            round = 1;
-            roundDisplay.textContent = round;
-            welcomeMessage.textContent = 'Let\'s start the game.';
-            welcomeMessage.style.display = 'block';
-            reset();
-            pauseButton.style.display = 'none';
-            startButton.style.display = 'inline-block';
-        } else {
-            // Redirect to index.html
-            window.location.href = 'index.html';
+        // Calculate total score including all rounds
+        let totalScore = 0;
+        for (let i = 0; i < roundScores.length; i++) {
+            totalScore += roundScores[i];
         }
+
+        // Display final score
+        const finalScoreMessage = `Game Over! Your Final Score: ${totalScore}`;
+        alert(finalScoreMessage);
+
+        // Redirect to index.html
+        window.location.href = 'index.html';
     }
+
+
+
+
+
 </script>
 
 </body>
