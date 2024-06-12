@@ -130,6 +130,9 @@
 </head>
 <body>
 <h1>Welcome to the Keyboard Drawing Game!</h1>
+<audio id="bgMusic" loop autoplay>
+    <source src="sounds/marimba-tropical-african-travel-game-197517.mp3" type="audio/mpeg">
+</audio>
 <div class="tutorial-container" id="tutorialContainer">
     <div class="story visible">
         <h2 class="animated-element">Story</h2>
@@ -146,7 +149,7 @@
         </ul>
         <p><strong>Game Mechanics:</strong></p>
         <ul>
-            <li>The game consists of 3 rounds, each with a 15-second time limit.</li>
+            <li>The game consists of 3 rounds, each with a 25-second time limit.</li>
             <li>Fill as much of the canvas as possible to score points. Each new pixel painted earns you 10 points.</li>
             <li>Avoid painting over the same pixel, as it won't earn you additional points.</li>
             <li>Each round increases the canvas size, making it more challenging.</li>
@@ -165,23 +168,21 @@
         </ul>
     </div>
     <div class="nav-buttons">
-
         <button id="prevButton">Previous</button>
         <button id="nextButton">Next</button>
         <button id="startGameButton">Start Game</button>
     </div>
-
 </div>
 <script>
     const sections = document.querySelectorAll('.tutorial-container > div');
     let currentIndex = 0;
     const tutorialContainer = document.getElementById('tutorialContainer');
+    const bgMusic = document.getElementById('bgMusic');
 
     function updateVisibility() {
         sections.forEach((section, index) => {
             if (index === currentIndex) {
                 section.classList.add('visible');
-
                 if (index === 0) {
                     document.getElementById('prevButton').style.display = 'none';
                     document.getElementById('nextButton').style.display = 'inline';
@@ -195,7 +196,6 @@
                 section.classList.remove('visible');
             }
         });
-
         // Adjust height of tutorial container dynamically
         const sectionHeight = sections[currentIndex].scrollHeight;
         tutorialContainer.style.height = `${sectionHeight + 150}px`;
@@ -213,6 +213,12 @@
 
     document.getElementById('startGameButton').addEventListener('click', function() {
         window.location.href = 'play.html'; // Navigate to game page
+    });
+    document.addEventListener('DOMContentLoaded', (event) => {
+        const bgMusic = document.getElementById('bgMusic');
+        bgMusic.play().catch(error => {
+            console.error('Failed to play background music:', error);
+        });
     });
 
     // Initial visibility update

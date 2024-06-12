@@ -113,6 +113,9 @@
 </head>
 <body>
 <h1>FILL UP WITH WATER!</h1>
+<audio id="bgMusic" loop>
+    <source src="sounds/marimba-tropical-african-travel-game-197517.mp3" type="audio/mpeg">
+</audio>
 <div id="gameContainer">
     <div id="welcomeMessage" style="display: none;"></div>
     <button id="startButton">Start</button>
@@ -163,10 +166,13 @@
     const startButton = document.getElementById('startButton');
     const pauseButton = document.getElementById('pauseButton');
     const restartButton = document.getElementById('restartButton');
+    const bgMusic = document.getElementById('bgMusic');
+
     let timerId;
     let prevX = x;
     let prevY = y;
     let gameStarted = false;
+    let playAgainPrompted = false; // Flag to track if play again prompt has been shown
     let selectedColor = '#00673a';
 
     const colorPicker = document.getElementById('colorPicker');
@@ -184,6 +190,7 @@
     }
 
     startButton.addEventListener('click', function() {
+        bgMusic.play();
         startButton.style.display = 'none';
         const playerName = prompt('Enter your name:');
         if (playerName !== null && playerName.trim() !== '') {
@@ -364,9 +371,20 @@
     }
 
     function endGame() {
-        alert('Game Over! Your Final Score: ' + score);
-        let playAgain = confirm('Do you want to play again?');
+        // Stop background music if it's playing
+        bgMusic.pause();
+        bgMusic.currentTime = 0; // Reset playback position
+
+        // Only ask once if the player wants to play again
+        if (playAgainPrompted) return; // If already prompted, return
+
+        playAgainPrompted = true; // Set flag to indicate prompt has been shown
+
+        // Ask if the player wants to play again
+        let playAgain = confirm('Game Over! Your Final Score: ' + score + '\n\nDo you want to play again?');
+
         if (playAgain) {
+            // Reset game variables and display
             round = 1;
             roundDisplay.textContent = round;
             welcomeMessage.textContent = 'Let\'s start the game.';
@@ -375,12 +393,12 @@
             pauseButton.style.display = 'none';
             startButton.style.display = 'inline-block';
         } else {
+            // Redirect to index.html
             window.location.href = 'index.html';
         }
     }
-
-
 </script>
+
 </body>
 </html>
 
